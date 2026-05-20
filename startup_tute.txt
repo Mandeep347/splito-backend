@@ -1,0 +1,11 @@
+# Start DB + Redis
+docker compose up -d db redis
+
+# Activate Python env
+venv\Scripts\activate
+
+# Run the API
+uvicorn app.main:app --reload
+
+# Stop everything when done
+docker compose down
