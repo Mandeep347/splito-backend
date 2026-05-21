@@ -1,0 +1,49 @@
+services:
+  - type: web
+    name: splito-api
+    runtime: python
+    region: singapore
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: splito-db
+          property: connectionString
+      - key: SYNC_DATABASE_URL
+        fromDatabase:
+          name: splito-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: splito-redis
+          type: redis
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "30"
+      - key: REFRESH_TOKEN_EXPIRE_DAYS
+        value: "7"
+      - key: APP_ENV
+        value: production
+      - key: DEBUG
+        value: "false"
+      - key: APP_NAME
+        value: Splito
+      - key: API_VERSION
+        value: v1
+
+databases:
+  - name: splito-db
+    databaseName: splito_db
+    user: splito
+    region: singapore
+    plan: free
+
+  - name: splito-redis
+    region: singapore
+    plan: free

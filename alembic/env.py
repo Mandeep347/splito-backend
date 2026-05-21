@@ -20,21 +20,10 @@ if config.config_file_name is not None:
 
 target_metadata = Base.metadata
 
-# Use sync URL for Alembic CLI (asyncpg doesn't work with Alembic's sync runner)
-# Falls back to DATABASE_URL with driver swapped if SYNC_DATABASE_URL not set
-def get_sync_url() -> str:
-    if hasattr(settings, "sync_database_url") and settings.sync_database_url:
-        return settings.sync_database_url
-    # Auto-convert asyncpg URL to psycopg2
-    return settings.database_url.replace(
-        "postgresql+asyncpg://", "postgresql://"
-    )
-
 
 def run_migrations_offline() -> None:
-    url = get_sync_url()
     context.configure(
-        url=url,
+        url=settings.sync_db_url,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
@@ -45,7 +34,7 @@ def run_migrations_offline() -> None:
 
 def run_migrations_online() -> None:
     connectable = create_engine(
-        get_sync_url(),
+        settings.sync_db_url,
         poolclass=pool.NullPool,
     )
     with connectable.connect() as connection:

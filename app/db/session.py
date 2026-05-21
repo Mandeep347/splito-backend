@@ -5,15 +5,16 @@ from sqlalchemy.orm import DeclarativeBase
 
 from app.core.config import settings
 
+
 def _engine_kwargs() -> dict:
     """Return engine kwargs appropriate for the configured DB dialect."""
     kw: dict = {"echo": settings.debug}
-    if not settings.database_url.startswith("sqlite"):
+    if not settings.async_database_url.startswith("sqlite"):
         kw.update(pool_pre_ping=True, pool_size=10, max_overflow=20)
     return kw
 
 
-engine = create_async_engine(settings.database_url, **_engine_kwargs())
+engine = create_async_engine(settings.async_database_url, **_engine_kwargs())
 
 AsyncSessionLocal = async_sessionmaker(
     bind=engine,
