@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, BackgroundTasks, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
@@ -15,6 +15,7 @@ from app.schemas.group import (
     UpdateGroupRequest,
 )
 from app.services.group_service import GroupService
+from app.services.notification_triggers import notify_member_added
 
 router = APIRouter(prefix="/groups", tags=["Groups"])
 
@@ -87,10 +88,23 @@ async def get_members(
 async def add_member(
     group_id: uuid.UUID,
     payload: AddMemberRequest,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user),
     svc: GroupService = Depends(_svc),
 ):
-    return await svc.add_member(group_id, payload, current_user)
+    member = await svc.add_member(group_id, payload, current_user)
+
+    # ── Fire-and-forget: notify the new member ───────────────────────────────
+    # Fetch group name for the notification message
+    group_detail = await svc.get_group_detail(group_id, current_user)
+    background_tasks.add_task(
+        notify_member_added,
+        group_id=group_id,
+        group_name=group_detail.name,
+        new_member_id=member.user_id,
+    )
+
+    return member
 
 
 @router.delete("/{group_id}/members/{user_id}", status_code=status.HTTP_204_NO_CONTENT)

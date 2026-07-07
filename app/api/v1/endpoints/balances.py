@@ -1,11 +1,12 @@
 import uuid
 from decimal import Decimal
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, BackgroundTasks, Depends, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
+from app.domain.group.models import Group
 from app.domain.user.models import User
 from app.middleware.auth import get_current_user
 from app.repositories.balance_repository import BalanceCacheRepository
@@ -20,6 +21,7 @@ from app.schemas.balance import (
     UserOverallBalance,
 )
 from app.services.balance_service import BalanceService
+from app.services.notification_triggers import notify_settlement_recorded
 from app.services.settlement_service import SettlementService
 
 router = APIRouter(tags=["Balances & Settlements"])
@@ -47,7 +49,6 @@ async def get_group_balances(
     if not await member_repo.get_active_membership(group_id, current_user.id):
         raise UserNotInGroupError("You are not a member of this group.")
 
-    from app.domain.group.models import Group
     group = await db.scalar(select(Group).where(Group.id == group_id))
     currency = group.default_currency if group else "INR"
 
@@ -69,7 +70,10 @@ async def get_group_balances(
     return GroupBalancesResponse(group_id=group_id, currency=currency, balances=pairs)
 
 
-@router.get("/groups/{group_id}/balances/simplified", response_model=SimplifiedBalancesResponse)
+@router.get(
+    "/groups/{group_id}/balances/simplified",
+    response_model=SimplifiedBalancesResponse,
+)
 async def get_simplified_balances(
     group_id: uuid.UUID,
     current_user: User = Depends(get_current_user),
@@ -81,7 +85,6 @@ async def get_simplified_balances(
     if not await member_repo.get_active_membership(group_id, current_user.id):
         raise UserNotInGroupError("You are not a member of this group.")
 
-    from app.domain.group.models import Group
     group = await db.scalar(select(Group).where(Group.id == group_id))
     currency = group.default_currency if group else "INR"
 
@@ -114,7 +117,6 @@ async def get_my_overall_balances(
     """Net cross-group balance summary for the logged-in user."""
     rows = await svc.get_user_all_group_balances(current_user.id)
 
-    # Aggregate by counterpart across groups
     net: dict[uuid.UUID, Decimal] = {}
     for row in rows:
         oid = row.other_user_id
@@ -129,7 +131,7 @@ async def get_my_overall_balances(
             counterpart_user_id=other_id,
             counterpart_name=other.name if other else "Unknown",
             net_amount=amount,
-            currency="INR",  # multi-currency aggregation is an advanced feature
+            currency="INR",
         ))
     return result
 
@@ -144,13 +146,30 @@ async def get_my_overall_balances(
 async def create_settlement(
     group_id: uuid.UUID,
     payload: CreateSettlementRequest,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user),
     svc: SettlementService = Depends(_settlement_svc),
 ):
-    return await svc.create_settlement(group_id, payload, current_user)
+    settlement = await svc.create_settlement(group_id, payload, current_user)
+
+    # ── Fire-and-forget: notify the recipient ────────────────────────────────
+    background_tasks.add_task(
+        notify_settlement_recorded,
+        group_id=group_id,
+        settlement_id=settlement.id,
+        from_user_name=settlement.from_user_name,
+        to_user_id=settlement.to_user_id,
+        currency=settlement.currency,
+        amount=settlement.amount,
+    )
+
+    return settlement
 
 
-@router.get("/groups/{group_id}/settlements", response_model=list[SettlementResponse])
+@router.get(
+    "/groups/{group_id}/settlements",
+    response_model=list[SettlementResponse],
+)
 async def list_settlements(
     group_id: uuid.UUID,
     current_user: User = Depends(get_current_user),

@@ -7,6 +7,7 @@ from app.core.exceptions import (
     InvalidCredentialsError,
     InvalidSplitPercentageError,
     InvalidSplitTotalError,
+    NotificationNotFoundError,
     OutstandingBalanceError,
     SelfSettlementError,
     SettlementExceedsBalanceError,
@@ -33,6 +34,7 @@ def _error(request: Request, status: int, code: str, message: str) -> JSONRespon
 
 
 def register_exception_handlers(app: FastAPI) -> None:
+
     @app.exception_handler(UserAlreadyExistsError)
     async def _(req: Request, exc: UserAlreadyExistsError):
         return _error(req, 409, "USER_ALREADY_EXISTS", str(exc))
@@ -69,9 +71,21 @@ def register_exception_handlers(app: FastAPI) -> None:
     async def _(req: Request, exc: OutstandingBalanceError):
         return _error(req, 422, "OUTSTANDING_BALANCE_EXISTS", str(exc))
 
+    @app.exception_handler(ExpenseNotFoundError)
+    async def _(req: Request, exc: ExpenseNotFoundError):
+        return _error(req, 404, "EXPENSE_NOT_FOUND", str(exc))
+
+    @app.exception_handler(SettlementNotFoundError)
+    async def _(req: Request, exc: SettlementNotFoundError):
+        return _error(req, 404, "SETTLEMENT_NOT_FOUND", str(exc))
+
     @app.exception_handler(InvalidSplitTotalError)
     async def _(req: Request, exc: InvalidSplitTotalError):
         return _error(req, 422, "INVALID_SPLIT_TOTAL", str(exc))
+
+    @app.exception_handler(InvalidSplitPercentageError)
+    async def _(req: Request, exc: InvalidSplitPercentageError):
+        return _error(req, 422, "INVALID_SPLIT_PERCENTAGE", str(exc))
 
     @app.exception_handler(SelfSettlementError)
     async def _(req: Request, exc: SelfSettlementError):
@@ -81,17 +95,9 @@ def register_exception_handlers(app: FastAPI) -> None:
     async def _(req: Request, exc: SettlementExceedsBalanceError):
         return _error(req, 422, "SETTLEMENT_EXCEEDS_BALANCE", str(exc))
 
-    @app.exception_handler(ExpenseNotFoundError)
-    async def _(req: Request, exc: ExpenseNotFoundError):
-        return _error(req, 404, "EXPENSE_NOT_FOUND", str(exc))
-
-    @app.exception_handler(SettlementNotFoundError)
-    async def _(req: Request, exc: SettlementNotFoundError):
-        return _error(req, 404, "SETTLEMENT_NOT_FOUND", str(exc))
-
-    @app.exception_handler(InvalidSplitPercentageError)
-    async def _(req: Request, exc: InvalidSplitPercentageError):
-        return _error(req, 422, "INVALID_SPLIT_PERCENTAGE", str(exc))
+    @app.exception_handler(NotificationNotFoundError)
+    async def _(req: Request, exc: NotificationNotFoundError):
+        return _error(req, 404, "NOTIFICATION_NOT_FOUND", str(exc))
 
     @app.exception_handler(SplitoDomainError)
     async def _(req: Request, exc: SplitoDomainError):

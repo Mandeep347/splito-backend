@@ -77,3 +77,9 @@ class SelfSettlementError(SplitoDomainError):
 
 class SettlementExceedsBalanceError(SplitoDomainError):
     pass
+
+
+# ─── Notification ─────────────────────────────────────────────────────────────
+
+class NotificationNotFoundError(SplitoDomainError):
+    pass
