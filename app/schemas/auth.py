@@ -25,6 +25,27 @@ class RefreshRequest(BaseModel):
     refresh_token: str
 
 
+# ─── Email Verification ───────────────────────────────────────────────────────
+
+class VerifyEmailRequest(BaseModel):
+    token: str = Field(..., min_length=1)
+
+
+class ResendVerificationRequest(BaseModel):
+    email: EmailStr
+
+
+# ─── Password Reset ───────────────────────────────────────────────────────────
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str = Field(..., min_length=1)
+    new_password: str = Field(..., min_length=8, max_length=128)
+
+
 # ─── User ────────────────────────────────────────────────────────────────────
 
 class UserResponse(BaseModel):
@@ -33,6 +54,7 @@ class UserResponse(BaseModel):
     email: str
     preferred_currency: str
     is_active: bool
+    is_email_verified: bool
 
     model_config = {"from_attributes": True}
 
@@ -40,3 +62,9 @@ class UserResponse(BaseModel):
 class UpdateUserRequest(BaseModel):
     name: str | None = Field(None, min_length=1, max_length=100)
     preferred_currency: str | None = Field(None, min_length=3, max_length=3)
+
+
+# ─── Generic message response ─────────────────────────────────────────────────
+
+class MessageResponse(BaseModel):
+    message: str

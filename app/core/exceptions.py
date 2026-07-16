@@ -1,7 +1,4 @@
-"""
-Domain-specific exceptions.
-These map cleanly to HTTP error codes in the exception handlers.
-"""
+"""Domain-specific exceptions mapped to HTTP codes in exception_handlers.py."""
 
 
 class SplitoDomainError(Exception):
@@ -13,12 +10,16 @@ class SplitoDomainError(Exception):
 class InvalidCredentialsError(SplitoDomainError):
     pass
 
-
 class TokenExpiredError(SplitoDomainError):
     pass
 
-
 class UnauthorizedError(SplitoDomainError):
+    pass
+
+class EmailNotVerifiedError(SplitoDomainError):
+    pass
+
+class InvalidTokenError(SplitoDomainError):
     pass
 
 
@@ -26,7 +27,6 @@ class UnauthorizedError(SplitoDomainError):
 
 class UserNotFoundError(SplitoDomainError):
     pass
-
 
 class UserAlreadyExistsError(SplitoDomainError):
     pass
@@ -37,17 +37,13 @@ class UserAlreadyExistsError(SplitoDomainError):
 class GroupNotFoundError(SplitoDomainError):
     pass
 
-
 class UserNotInGroupError(SplitoDomainError):
     pass
-
 
 class UserAlreadyInGroupError(SplitoDomainError):
     pass
 
-
 class OutstandingBalanceError(SplitoDomainError):
-    """Raised when trying to remove a member who still has a pending balance."""
     pass
 
 
@@ -56,10 +52,8 @@ class OutstandingBalanceError(SplitoDomainError):
 class ExpenseNotFoundError(SplitoDomainError):
     pass
 
-
 class InvalidSplitTotalError(SplitoDomainError):
     pass
-
 
 class InvalidSplitPercentageError(SplitoDomainError):
     pass
@@ -70,10 +64,8 @@ class InvalidSplitPercentageError(SplitoDomainError):
 class SettlementNotFoundError(SplitoDomainError):
     pass
 
-
 class SelfSettlementError(SplitoDomainError):
     pass
-
 
 class SettlementExceedsBalanceError(SplitoDomainError):
     pass

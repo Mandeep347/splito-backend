@@ -2,11 +2,13 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from app.core.exceptions import (
+    EmailNotVerifiedError,
     ExpenseNotFoundError,
     GroupNotFoundError,
     InvalidCredentialsError,
     InvalidSplitPercentageError,
     InvalidSplitTotalError,
+    InvalidTokenError,
     NotificationNotFoundError,
     OutstandingBalanceError,
     SelfSettlementError,
@@ -50,6 +52,14 @@ def register_exception_handlers(app: FastAPI) -> None:
     @app.exception_handler(TokenExpiredError)
     async def _(req: Request, exc: TokenExpiredError):
         return _error(req, 401, "TOKEN_EXPIRED", str(exc))
+
+    @app.exception_handler(EmailNotVerifiedError)
+    async def _(req: Request, exc: EmailNotVerifiedError):
+        return _error(req, 403, "EMAIL_NOT_VERIFIED", str(exc))
+
+    @app.exception_handler(InvalidTokenError)
+    async def _(req: Request, exc: InvalidTokenError):
+        return _error(req, 400, "INVALID_TOKEN", str(exc))
 
     @app.exception_handler(UnauthorizedError)
     async def _(req: Request, exc: UnauthorizedError):
@@ -101,5 +111,4 @@ def register_exception_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(SplitoDomainError)
     async def _(req: Request, exc: SplitoDomainError):
-        # Catch-all for any unhandled domain error
         return _error(req, 422, "DOMAIN_ERROR", str(exc))

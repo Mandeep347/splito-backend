@@ -17,8 +17,6 @@ class Settings(BaseSettings):
     app_env: str = "development"
 
     # Database
-    # Render provides postgresql:// — we convert to asyncpg for the app
-    # and keep sync version for Alembic
     database_url: str
     sync_database_url: str | None = None
 
@@ -31,25 +29,31 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 30
     refresh_token_expire_days: int = 7
 
+    # Email — Resend
+    resend_api_key: str = ""
+    email_from: str = "onboarding@resend.dev"
+    frontend_url: str = "http://localhost:3000"
+
+    # Token expiry
+    email_verification_expire_hours: int = 24
+    password_reset_expire_minutes: int = 15
+
     @property
     def async_database_url(self) -> str:
-        """Always returns asyncpg-compatible URL for SQLAlchemy async engine."""
         url = self.database_url
-        # Render gives postgresql:// or postgres:// — convert for asyncpg
-        url = url.replace("postgres://", "postgresql+asyncpg://")
-        url = url.replace("postgresql://", "postgresql+asyncpg://")
+        url = url.replace("postgres://", "postgresql://")
+        if "+asyncpg" not in url:
+            url = url.replace("postgresql://", "postgresql+asyncpg://")
         return url
 
     @property
     def sync_db_url(self) -> str:
-        """Always returns psycopg2-compatible URL for Alembic."""
         if self.sync_database_url:
             url = self.sync_database_url
         else:
             url = self.database_url
-        # Strip asyncpg driver if present
-        url = url.replace("postgresql+asyncpg://", "postgresql://")
         url = url.replace("postgres://", "postgresql://")
+        url = url.replace("postgresql+asyncpg://", "postgresql://")
         return url
 
     @property

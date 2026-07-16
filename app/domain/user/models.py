@@ -12,11 +12,18 @@ class User(Base, UUIDMixin, TimestampMixin):
     __tablename__ = "users"
 
     name: Mapped[str] = mapped_column(String(100), nullable=False)
-    email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
+    email: Mapped[str] = mapped_column(
+        String(255), unique=True, nullable=False, index=True
+    )
     phone: Mapped[str | None] = mapped_column(String(20), nullable=True)
     password_hash: Mapped[str] = mapped_column(Text, nullable=False)
-    preferred_currency: Mapped[str] = mapped_column(String(3), default="INR", nullable=False)
+    preferred_currency: Mapped[str] = mapped_column(
+        String(3), default="INR", nullable=False
+    )
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    is_email_verified: Mapped[bool] = mapped_column(
+        Boolean, default=False, nullable=False
+    )
 
     # Relationships (string refs avoid circular imports across domain modules)
     memberships: Mapped[list] = relationship(
