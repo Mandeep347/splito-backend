@@ -156,7 +156,7 @@ async def send_verification_email(
     Never raises — logs error and returns silently on failure.
     """
     verify_url = (
-        f"{settings.frontend_url}/verify-email?token={token}"
+        f"{settings.frontend_url}/verify-email/{token}"
     )
     try:
         resend.Emails.send({
@@ -183,7 +183,7 @@ async def send_password_reset_email(
     Never raises — logs error and returns silently on failure.
     """
     reset_url = (
-        f"{settings.frontend_url}/reset-password?token={token}"
+        f"{settings.frontend_url}/reset-password/{token}"
     )
     try:
         resend.Emails.send({
