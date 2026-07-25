@@ -103,7 +103,7 @@ def _deep_link_page(deep_link: str, action: str) -> str:
 
 
 @router.get(
-    "/auth/verify-email",
+    "/auth/verify-email{token}",
     response_class=HTMLResponse,
     summary="Email verification redirect",
     description="Clicked from email — redirects to splito:// deep link to open Flutter app.",
