@@ -217,6 +217,7 @@ class AuthService:
         if not user:
             raise UserNotFoundError("User not found.")
 
+        user.is_email_verified = True
         user.password_hash = hash_password(new_password)
         await self.token_repo.consume_token(token_obj)
         await self.db.flush()
