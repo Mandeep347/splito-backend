@@ -31,8 +31,7 @@ class Settings(BaseSettings):
 
     # Email — Resend
     resend_api_key: str = ""
-    onboarding_email: str = "onboarding@resend.dev"
-    reset_email: str = "reset-password@resend.dev"
+    email_from: str = "onboarding@resend.dev"
     frontend_url: str = "http://localhost:3000"
 
     # Token expiry
