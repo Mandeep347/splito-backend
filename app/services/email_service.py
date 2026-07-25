@@ -160,7 +160,7 @@ async def send_verification_email(
     )
     try:
         resend.Emails.send({
-            "from": settings.email_from,
+            "from": settings.onboarding_email,
             "to": [to_email],
             "subject": "Verify your Splito email address",
             "html": _verification_email_html(name, verify_url),
@@ -187,7 +187,7 @@ async def send_password_reset_email(
     )
     try:
         resend.Emails.send({
-            "from": settings.email_from,
+            "from": settings.reset_email,
             "to": [to_email],
             "subject": "Reset your Splito password",
             "html": _reset_password_email_html(name, reset_url),
