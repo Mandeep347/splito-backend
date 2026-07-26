@@ -123,8 +123,22 @@ class GroupService:
         return _to_detail_response(group)  # type: ignore
 
     async def archive_group(self, group_id: uuid.UUID, user: User) -> GroupDetailResponse:
+        """
+        Archives a group and clears its balance cache.
+        
+        FIX: balance_cache rows are deleted on archive so they
+        never ghost into GET /users/me/balances cross-group summary.
+        The ledger_entries are preserved for audit — balances can
+        always be recomputed from ledger if needed.
+        """
         group = await self._require_admin(group_id, user.id)
         group.status = GroupStatus.ARCHIVED
+
+        # Clear balance cache for this group
+        from app.repositories.balance_repository import BalanceCacheRepository
+        balance_cache_repo = BalanceCacheRepository(self.db)
+        await balance_cache_repo.clear_group_balances(group_id)
+
         await self.db.flush()
         group = await self.group_repo.get_by_id_with_members(group.id)
         return _to_detail_response(group)  # type: ignore

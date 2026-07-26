@@ -1,10 +1,11 @@
 import uuid
 from decimal import Decimal
 
-from sqlalchemy import select
+from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.balance.models import BalanceCache, LedgerEntry
+from app.domain.group.models import Group, GroupStatus
 from app.domain.settlement.models import Settlement
 from app.repositories.base import BaseRepository
 
@@ -30,8 +31,18 @@ class BalanceCacheRepository(BaseRepository[BalanceCache]):
         return list(result.all())
 
     async def get_user_balances_all_groups(self, user_id: uuid.UUID) -> list[BalanceCache]:
+        """
+        FIX: Only return balances from ACTIVE groups.
+        Archived groups are excluded so they don't appear
+        in the cross-group balance summary.
+        """
         result = await self.db.scalars(
-            select(BalanceCache).where(BalanceCache.user_id == user_id)
+            select(BalanceCache)
+            .join(Group, Group.id == BalanceCache.group_id)
+            .where(
+                BalanceCache.user_id == user_id,
+                Group.status == GroupStatus.ACTIVE,  # ← THE FIX
+            )
         )
         return list(result.all())
 
@@ -42,7 +53,7 @@ class BalanceCacheRepository(BaseRepository[BalanceCache]):
         other_user_id: uuid.UUID,
         delta: Decimal,
     ) -> None:
-        """Atomically add delta to the cached balance, creating row if absent."""
+        """Atomically add delta to cached balance, creating row if absent."""
         row = await self.get_pair(group_id, user_id, other_user_id)
         if row:
             row.balance_amount = Decimal(str(row.balance_amount)) + delta
@@ -55,6 +66,17 @@ class BalanceCacheRepository(BaseRepository[BalanceCache]):
                     balance_amount=delta,
                 )
             )
+        await self.db.flush()
+
+    async def clear_group_balances(self, group_id: uuid.UUID) -> None:
+        """
+        FIX: Delete all balance cache rows for a group.
+        Called when a group is archived so balances don't
+        ghost into cross-group summaries.
+        """
+        await self.db.execute(
+            delete(BalanceCache).where(BalanceCache.group_id == group_id)
+        )
         await self.db.flush()
 
 
