@@ -31,7 +31,8 @@ class Settings(BaseSettings):
 
     # Email — Resend
     resend_api_key: str = ""
-    email_from: str = "onboarding@resend.dev"
+    email_from_verify: str = "verify@support.splitmate.page"
+    email_from_reset: str = "security@support.splitmate.page"
     frontend_url: str = "http://localhost:3000"
 
     # Token expiry
