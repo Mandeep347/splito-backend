@@ -23,7 +23,7 @@ def _base_template(content: str) -> str:
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Splito</title>
+  <title>Splitmate</title>
 </head>
 <body style="margin:0;padding:0;background:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f5;padding:40px 0;">
@@ -37,7 +37,7 @@ def _base_template(content: str) -> str:
           <tr>
             <td style="background:#6366f1;padding:32px 40px;text-align:center;">
               <h1 style="margin:0;color:#ffffff;font-size:28px;font-weight:700;
-                         letter-spacing:-0.5px;">💸 Splito</h1>
+                         letter-spacing:-0.5px;">💸 Splitmate</h1>
               <p style="margin:6px 0 0;color:#c7d2fe;font-size:14px;">
                 Expense splitting made simple
               </p>
@@ -56,7 +56,7 @@ def _base_template(content: str) -> str:
             <td style="background:#f9fafb;padding:20px 40px;text-align:center;
                        border-top:1px solid #e5e7eb;">
               <p style="margin:0;color:#9ca3af;font-size:12px;">
-                © 2026 Splito · This email was sent to you because you have an account with Splito.
+                © 2026 Splito · This email was sent to you because you have an account with Splitmate.
               </p>
             </td>
           </tr>
@@ -76,7 +76,7 @@ def _verification_email_html(name: str, verify_url: str) -> str:
         Verify your email address
       </h2>
       <p style="margin:0 0 24px;color:#6b7280;font-size:15px;line-height:1.6;">
-        Hi {name}, welcome to Splito! Please verify your email address to
+        Hi {name}, welcome to Splitmate! Please verify your email address to
         activate your account and start splitting expenses with your friends.
       </p>
 
@@ -91,7 +91,7 @@ def _verification_email_html(name: str, verify_url: str) -> str:
 
       <p style="margin:24px 0 0;color:#9ca3af;font-size:13px;text-align:center;">
         This link expires in <strong>24 hours</strong>.<br/>
-        If you didn't create a Splito account, you can safely ignore this email.
+        If you didn't create a Splitmate account, you can safely ignore this email.
       </p>
 
       <div style="margin:28px 0 0;padding:16px;background:#f3f4f6;
@@ -111,7 +111,7 @@ def _reset_password_email_html(name: str, reset_url: str) -> str:
         Reset your password
       </h2>
       <p style="margin:0 0 24px;color:#6b7280;font-size:15px;line-height:1.6;">
-        Hi {name}, we received a request to reset the password for your Splito account.
+        Hi {name}, we received a request to reset the password for your Splitmate account.
         Click the button below to choose a new password.
       </p>
 
@@ -162,7 +162,7 @@ async def send_verification_email(
         resend.Emails.send({
             "from": settings.email_from_verify,
             "to": [to_email],
-            "subject": "Verify your Splito email address",
+            "subject": "Verify your Splitmate email address",
             "html": _verification_email_html(name, verify_url),
         })
         logger.info("Verification email sent to %s", to_email)
@@ -189,7 +189,7 @@ async def send_password_reset_email(
         resend.Emails.send({
             "from": settings.email_from_reset,
             "to": [to_email],
-            "subject": "Reset your Splito password",
+            "subject": "Reset your Splitmate password",
             "html": _reset_password_email_html(name, reset_url),
         })
         logger.info("Password reset email sent to %s", to_email)

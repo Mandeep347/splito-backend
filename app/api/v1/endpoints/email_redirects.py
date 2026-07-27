@@ -22,7 +22,7 @@ def _deep_link_page(deep_link: str, action: str) -> str:
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Splito — {action}</title>
+  <title>Splitmate — {action}</title>
   <style>
     * {{ box-sizing: border-box; margin: 0; padding: 0; }}
     body {{
@@ -87,14 +87,14 @@ def _deep_link_page(deep_link: str, action: str) -> str:
 <body>
   <div class="card">
     <div class="logo">💸</div>
-    <h1>Opening Splito...</h1>
+    <h1>Opening Splitmate...</h1>
     <p>
       If the app doesn't open automatically,
       tap the button below.
     </p>
-    <a href="{deep_link}" class="btn">Open Splito App</a>
+    <a href="{deep_link}" class="btn">Open Splitmate App</a>
     <p class="note">
-      Make sure the Splito app is installed on your device.
+      Make sure the Splitmate app is installed on your device.
     </p>
   </div>
 </body>
