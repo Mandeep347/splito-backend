@@ -27,7 +27,7 @@ jobs:
         run: pytest tests/ -v
         env:
           SECRET_KEY: test-secret-key
-          DATABASE_URL: sqlite+aiosqlite:///:memory:
+          DATABASE_URL: sqlite+aiosqlite:///:memory
 
       - name: Deploy to Heroku
         uses: akhileshns/heroku-deploy@v3.13.15
